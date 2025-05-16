@@ -7,7 +7,9 @@ behavior while banking. This analysis is important since retaining the customers
 new customers. Retention of the long users of the banking facility showcases that the bank has a long-time trust which can 
 make them attract more customers. Predictor variables such as credit score can help in determining the churning with tenure 
 and balance determining the customer’s relationship with the banking services. 
+
 Dataset source - https://www.kaggle.com/datasets/radheshyamkollipara/bank-customer-churn/data 
+
 Description – The dataset contains 10,000 observations with 18 variables. Variables include customer id, surname, credit 
 score, balance, number of products, card type, points ear_ned etc. One of the key response variables can be the Exited 
 variable to determine the customer churn. The response variable can vary based on different questions that the dataset 
