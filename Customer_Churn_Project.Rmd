@@ -1,0 +1,155 @@
+---
+title: "R_Project"
+author: "Nirmiti Dighe"
+date: "2024-04-27"
+output: html_document
+---
+
+## Introduction 
+The data contains details of different banking customers with their customer id, salary, credit score etc.With this data, we will be determining a bank customer churn and satisfaction which makes us analyze the customer behavior while banking. This analysis is important since retaining the customers serves to be cost effective than gaining new customers. Retention of the long users of the banking facility showcases that the bank has a long-time trust which can make them attract more customers. The dataset has 10,000 observations with 18 variables. The response variable being the exited variable which states that customers have exited the bank or not. Some of the response variables are the complain, satisfaction.score, Card.Type.
+
+The research questions that have been analyzed and found the answers are for: 
+1. What are the most significant predictors in determining the churn of the dataset ? 
+2. Apart from the most significant are there any other predictors which are influential in understanding the churn of the customers?
+3. With the predictors that influence the churn what measures can be taken to reduce the churn?
+
+## Methodology 
+
+1.Data processing 
+
+Customer churn records data is cleansed of any missing values(na),if present. Further I have considered a subset of the dataset with columns customerId,HasCrCard,Exited,Complain,Satisfaction.Score,Card.Type,Point.Earned,EstimatedSalary as a part of making my analysis on the churn rate only on these set of columns. With the columns chosen,to make my analysis robust and since whether the customer has decided to exit or not falls more under a classification problem thus converted the required columns as a factor which would be helpful to go further with different methods of classifications.Considering the following columns as to why they have being converted into factors:
+1. The Card.Type column is a categorical variable which has consists of three types of categories being Gold,Silver,Platinum. Since these can be formed into groups being numeric would not be benifiting us in the analysis process. 
+2. Exited,Complain,HasCrCard are binary values where by treating them as factors we can analyze effectively as a yes or no answer. For example whether a customer has a credit card or not, has complained or not these are answerable only if they are being treated as factors.
+```{r}
+customer_records<-read.csv("C:/Users/dighe/OneDrive/Documents/Semester - 2/Data Mining and Statistical learning/Customer-Churn-Records.csv")
+customer_records<-na.omit(customer_records)
+```
+
+```{r}
+customer_data <- subset(customer_records, select = c(CustomerId,IsActiveMember,HasCrCard, Exited, Complain, Satisfaction.Score, Card.Type, Point.Earned,EstimatedSalary))
+customer_data$Card.Type <- as.factor(customer_data$Card.Type)
+customer_data$Exited<- as.factor(customer_data$Exited)
+customer_data$HasCrCard <- as.factor(customer_data$HasCrCard)
+customer_data$Complain<- as.factor(customer_data$Complain)
+customer_data$Exited <- factor(customer_data$Exited, levels = c("0", "1"), labels = c("NotChurned", "Churned"))
+```
+2.Techniques used to analyze the data 
+
+A wide range of techniques such as the classification methods,Tree based methods have been used. These techniques are chosen because as my subset contains considerable ranges of predictors which are categorical therefore classification techniques work best with categorical variables. Classification techniques makes the task easier and does justice to the analysis since it works well with the data which is in the classified format. Where the questions are answered in a yes or no format. 
+In order to determine which columns out of the selected subset might be influential in predicting the customer churn we begin with using the classification technique called the Linear discriminant analysis. 
+
+## Results and discussion
+
+
+Linear Discriminant Analysis(LDA): 
+```{r}
+library(MASS)
+LDA_Fit <- lda(Exited ~ ., data = customer_data)
+LDA_Fit
+pred_lda <- predict(LDA_Fit, customer_data)  
+table(customer_data$Exited, pred_lda$class) 
+```
+The summary gives us an interpretation that about 20.38% customers are about to churn and 79.62% are not going to churn. The group means gives us a valuable insight on the predictors which significantly effect the churn of the customers. 
+HasCrCard1 - 
+About 70.71% non-churned customers posses a credit card with 69.92% of churned customers they do not posses a credit card this states that a customer's churn is not based on whether he has a credit card or not since the the percentage changes between the churned and non churned customers is less significant. It is like even though the customers possessed a credit card they had decided to churn. It may not solely influence the churn but can be considered for further analysis.  
+Complain1 - The non-churned customers shows a very low value which says they have not complained, whereas for the churned customers there is a significantly higher value which interprets us that the customers who have complained are likely to churn indicating that customer variable is an important predictor. 
+Satisfaction.scores - The significant difference between churned and not churned is lower, but we can analyse that the churned customers have a lower satisfaction score than the non churned customers. It may not influence the churn on a larger scale but then it does have some effect on the churn. 
+Card.Type - Also does not have a significant impact on the churn but can be analysed further. 
+Point.Earned - Cannot be considered as a strong predictor of the churn
+EstimatedSalary - Though there is less difference of values between the churned and non churned customers we can see that slightly higher income customers are likely to churn. 
+isActiveMember - This predictor has a significant impact after the complaint predictor which describes that an active member of the banking services may not consider leaving. 
+
+The coefficients of linear discriminants gives us a clear picture as to which variables are highly impactful. We can see that complain predictor is largely impactful. Also customers holding a silver credit card are likely to churn since it has a positive correlation value as compared to the card type holders of gold and platinum. Active member predictor is also considerably a significant predictor.The difference in its group means coefficient of the active member predictor states that customers are likely to churn if they are non-active. 
+
+The confusion matrix suggests us that the accuracy of the model where 7952 were correctly predicted as not churned with 4 incorrectly predicted as churned. 2034 customers were predicted as churned with 10 customers were incorrectly predicted as not churned. The model has a good a accuracy level.
+Accuracy level calculated (7952+2034)/10000 = 0.9986*100 = 99.86% . 
+Thus a higher accuracy level of 99.86% is obtained. 
+
+I have further analyzed if the the other classification techniques would do better or worse. Therefore, used quadratic discriminant analysis if there would be any complexity being captured which may not be seen in LDA. We considered a different technique in order to verify if building the model with a different technique might helped us enhance our analysis or give us a different picture if the variables are considered impactful or non impactful vary if we use a different model.
+
+Quadratic discriminant analysis (QDA): 
+```{r}
+QDA_Fit <- qda(Exited ~ ., data = customer_data)
+QDA_Fit
+pred_qda <- predict(QDA_Fit, customer_data)  
+table(customer_data$Exited, pred_qda$class) 
+```
+The model built using QDA gives us the same results that an LDA model had given us. Since QDA is a higher complexity model as compared to LDA and the results do not vary, considering a less complexity model would be preferred since either ways our results do not change including the accuracy of the model. 
+Logistic Regression model S
+```{r}
+fit_logistic <- glm(Exited ~ ., data = customer_data, family = "binomial")
+summary(fit_logistic)
+predict_logistic<- predict(fit_logistic, customer_data, type = "response")
+head(predict_logistic)
+predict_churning <- rep("Not Churned", nrow(customer_data))
+predict_churning[predict_logistic > 0.5] <- "Churned"
+table(customer_data$Exited, predict_churning)
+library(pROC)
+plot.roc(Exited ~ predict_logistic, asp = NA, data = customer_data)
+plot.roc(Exited ~ pred_lda$posterior[,1], asp = NA, col = "blue", add = TRUE, data = customer_data)
+
+```
+
+Logistic model gives us the result where the complaint variable p-value is less than alpha value 0.05 it states that it has a significant impact on the churn of customers. The accuracy derived for logistic is same to the ones resulted for the LDA and QDA models.By using this technique, an other variable is being seen to have a good significance where we can see if a member is active about the banking services they may not churn as compared to the ones being an active member of the services.
+The curve of the graph depicts that model is good at evaluating and identifying the positive cases and rejects the negative cases that is high specificity very well too.  
+
+Thus all three models using classification techniques gives us an understanding that the most significant predictor in understanding the customer churn is the complain predictor variable, followed by the IsActiveMember. Also though other variables such as the type of card a customer holds may not seem highly significant but they are the ones that cannot be neglected in the analysis as well since they do give useful insights on the churn of a customer.
+Due to a higher level of accuracy, which may make us question if the model has overfitting issues. Therefore, I considered to divide the data into training and test sets where I randomly sampled the subset of the dataset with 50% being in training set and 50% being in test set and further performing LDA.
+
+```{r}
+set.seed(24)
+train<-sample(1:nrow(customer_records),0.5*nrow(customer_data))
+traindata_customer<-customer_data[train,]
+testdata_customer<-customer_data[-train,]
+```
+
+
+```{r}
+LDA_Fit2 <- lda(Exited ~ ., data = traindata_customer)
+pred_lda_train2 <- predict(LDA_Fit2, traindata_customer)  
+conf_matrix_train <- table(traindata_customer$Exited, pred_lda_train2$class)
+pred_lda_test <- predict(LDA_Fit2, testdata_customer)
+conf_matrix_test <- table(testdata_customer$Exited,pred_lda_test$class)
+conf_matrix_train
+conf_matrix_test
+```
+
+The training and test data model has a good accuracy rate and there is no difference among the the model which performs on a training dataset and the model which performs on the test dataset therefore this makes us determine that the model does not have overfiting issues. The accuracy level obtained for training and test datasets are 99.86% respectively. Therefore, since my model didnot have any issues in complexity of the data therefore LDA could be the best technique used to analyse the dataset. 
+
+#Tree based methods
+#Random Forest
+
+2. Random forest method - I considered using this technique as I wanted to further my analysis and also know if the results obtained in the classification techniques differ from the ones obtained in the tree based techniques. This method is also useful in understanding and visualizing the influential predictors. 
+Random forests method works well with both categorical and numerical data therefore its easier to implement to understand the variations that the predictor variables can make since we don't have the restrictiveness of converting any predictor as a numeric or a factor. I not only wanted to consider the subset of the dataset but wanted to consider the dataset as a whole and determine if there are any other influential predictors which could help us understand the churn of a customer.
+
+```{r}
+set.seed(24)
+train<-sample(1:nrow(customer_records),0.5*nrow(customer_records))
+traindata_customer<-customer_records[train,]
+testdata_customer<-customer_records[-train,]
+
+library(randomForest)
+randomforest_churn <- randomForest(Exited ~ ., data = traindata_customer, mtry=4)
+
+```
+```{r}
+library(tree)
+fit_churn<- tree(Exited ~ ., data = traindata_customer)
+summary(fit_churn)
+```
+The summary of the tree depicts that complain is the most significant predictor as derived in the classification technique. The M mean of residuals which is close to zero suggests that the model doesnot overestimate or underestimate the churn which is preferred. The tree has two terminal nodes and the complain variable is the most significant predictor the nodes divided are two which reflects that the split is between the customers between the ones who have compplained and the ones who have not complained which results in the customer churn. 
+
+```{r}
+plot(fit_churn)
+text(fit_churn, cex = 0.5)
+```
+The fit for the tree is being plotted which indicates there is a threshold value of 0.5. So the ones above this value being 0.994 are likely to churn than  the ones below the threshold value being 0.00025 which states that the customers won't churn. 
+```{r}
+pred_forest <- predict(fit_churn, testdata_customer)
+mean((testdata_customer$Exited - pred_forest)^2)
+importance(randomforest_churn)
+varImpPlot(randomforest_churn)
+```
+In order to better analyse the results apart from subsetting the dataset. I had considered the entire dataset to validate if there are any other variables that could considered a significant predictor in the churn. I have applied random forest on the entire dataset and plot the results with variable importance plot which gives us better visualization results to understand the predictors. Here, apart from the complain variable being the most significant predictor age and number of products that a customer buys from the banking services are also considered to be significant in effecting the churn. 
+
+Therefore the analysis states that if the customers have to be retained efforts have to be made in order to make the customers actively participate and engage. The number of products also is a significant predictor which states that the ones have lesser number of products might be influenced by other banking services to consider there products and offers therefore emphasis should be made to diverse in the area of products. The card type also is slightly influential where silver type credit card have a slight tendency of churning therefore the focus can be made in understanding the offers related to specific credit card type. The analysis can be done much better in understanding how the complain variable is impacting the churn as in the complain variable being the response and determining what all factors are effecting that the customer decides to complain. 
