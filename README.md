@@ -1,4 +1,4 @@
-# Customer-Churn-Analysis - R programming, Random Forest, Logistic Regression 
+# Customer Churn Analysis - R programming, Random Forest, Logistic Regression 
 Bank Customer Churn Analysis
 
 # Proposed data –
